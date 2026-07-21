@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import QRCode from "qrcode";
 import { api } from "./api";
 
 /**
@@ -13,9 +15,13 @@ export default function QueueDisplay() {
   const [connectionError, setConnectionError] = useState("");
   const [now, setNow] = useState(() => new Date());
   const [enteringIds, setEnteringIds] = useState(() => new Set());
+  const [qrDataUrl, setQrDataUrl] = useState("");
   const prevIdsRef = useRef(new Set());
   const prevFrontIdRef = useRef(undefined);
   const announceTimeoutRef = useRef(null);
+
+  const joinUrl =
+    typeof window !== "undefined" ? `${window.location.origin}/unirse` : "";
 
   const announce = (name) => {
     if (!speechSupported) return;
@@ -56,6 +62,17 @@ export default function QueueDisplay() {
       window.removeEventListener("keydown", primeAudio);
     };
   }, []);
+
+  useEffect(() => {
+    if (!joinUrl) return;
+    QRCode.toDataURL(joinUrl, {
+      margin: 1,
+      width: 280,
+      color: { dark: "#1e1b4b", light: "#ffffff" }
+    })
+      .then(setQrDataUrl)
+      .catch(() => setQrDataUrl(""));
+  }, [joinUrl]);
 
   useEffect(() => {
     let cancelled = false;
@@ -116,71 +133,134 @@ export default function QueueDisplay() {
     hour: "2-digit",
     minute: "2-digit"
   });
+  const dateLabel = now.toLocaleDateString("es-DO", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
+  });
 
   return (
-    <div className="min-h-[100dvh] w-full bg-zinc-950 text-zinc-100 flex flex-col items-center px-6 py-10 font-sans overflow-hidden relative">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(99,102,241,0.25),transparent_60%)]" />
-
-      <div className="w-full max-w-2xl flex items-center justify-between mb-10 relative">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white flex items-center gap-3">
-            💈 Barbería
-          </h1>
-          <p className="text-zinc-400 mt-1">Cola de turnos en vivo</p>
-        </div>
-        <div className="text-right">
-          <div className="text-2xl font-semibold text-zinc-200 tabular-nums">{timeLabel}</div>
-          {connectionError && (
-            <p className="text-xs text-rose-400 mt-1">{connectionError}</p>
-          )}
-        </div>
-      </div>
-
-      <div className="w-full max-w-2xl relative flex-1">
-        {queue.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center py-24 text-zinc-500">
-            <div className="text-6xl mb-4">✂️</div>
-            <p className="text-2xl font-medium text-zinc-300">No hay clientes en espera</p>
-            <p className="mt-2 text-zinc-500">Acércate al mostrador para anotarte</p>
+    <div className="min-h-[100dvh] w-full bg-gradient-to-b from-indigo-50 via-white to-white text-zinc-900 font-sans overflow-x-hidden">
+      <div className="max-w-[1600px] mx-auto px-8 sm:px-16 lg:px-24 py-10">
+        <header className="flex items-start justify-between mb-12">
+          <div className="flex items-center gap-4">
+            <span className="text-5xl">💈</span>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-900">
+                Barbería
+              </h1>
+              <p className="text-zinc-500 text-sm capitalize">{dateLabel}</p>
+            </div>
           </div>
-        ) : (
-          <ul className="flex flex-col gap-3">
-            {queue.map((client, index) => {
-              const isEntering = enteringIds.has(client._id);
-              const isNext = index === 0;
-              return (
-                <li
-                  key={client._id}
-                  className={`flex items-center gap-5 rounded-3xl px-6 py-5 border transition-all duration-500 ease-out ${
-                    isNext
-                      ? "bg-indigo-600/20 border-indigo-500/60 shadow-lg shadow-indigo-950/40"
-                      : "bg-zinc-900 border-zinc-800"
-                  } ${
-                    isEntering
-                      ? "opacity-0 translate-y-4 scale-95"
-                      : "opacity-100 translate-y-0 scale-100"
-                  }`}
-                >
-                  <span
-                    className={`flex items-center justify-center w-14 h-14 rounded-full text-xl font-bold shrink-0 ${
-                      isNext ? "bg-indigo-500 text-white" : "bg-zinc-800 text-zinc-400"
-                    }`}
-                  >
-                    {index + 1}
-                  </span>
-                  <span className="text-2xl font-semibold text-zinc-100 truncate flex-1">
-                    {client.name}
-                  </span>
-                  {isNext && (
-                    <span className="text-xs font-bold uppercase tracking-wide text-indigo-300 bg-indigo-950/60 px-3 py-1.5 rounded-full shrink-0">
-                      En turno
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <div className="flex items-center gap-1.5 justify-end text-xs text-emerald-600 font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                EN VIVO
+              </div>
+              <div className="text-xl font-semibold text-zinc-700 tabular-nums">
+                {timeLabel}
+              </div>
+            </div>
+            <Link
+              to="/"
+              className="text-sm font-semibold text-zinc-600 bg-white border border-zinc-200 hover:border-zinc-300 hover:text-zinc-900 shadow-sm rounded-full px-4 py-2 transition-colors"
+            >
+              Iniciar sesión
+            </Link>
+          </div>
+        </header>
+
+        {connectionError && (
+          <p className="text-xs text-rose-500 mb-4 text-center sm:text-left">
+            {connectionError}
+          </p>
         )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-10 items-start">
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">
+                Fila de espera
+              </h2>
+              {queue.length > 0 && (
+                <span className="text-xs font-semibold text-zinc-500 bg-white border border-zinc-200 shadow-sm rounded-full px-3 py-1">
+                  {queue.length} {queue.length === 1 ? "persona" : "personas"}
+                </span>
+              )}
+            </div>
+
+            {queue.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center py-24 text-zinc-500 rounded-3xl border-2 border-dashed border-zinc-200 bg-white/60">
+                <div className="text-6xl mb-4">✂️</div>
+                <p className="text-2xl font-medium text-zinc-700">No hay clientes en espera</p>
+                <p className="mt-2 text-zinc-500">Escaneá el QR para anotarte</p>
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {queue.map((client, index) => {
+                  const isEntering = enteringIds.has(client._id);
+                  const isNext = index === 0;
+                  return (
+                    <li
+                      key={client._id}
+                      className={`flex items-center gap-5 rounded-3xl px-6 py-5 border transition-all duration-500 ease-out ${
+                        isNext
+                          ? "bg-indigo-50 border-indigo-300 shadow-md shadow-indigo-100"
+                          : "bg-white border-zinc-200 shadow-sm"
+                      } ${
+                        isEntering
+                          ? "opacity-0 translate-y-4 scale-95"
+                          : "opacity-100 translate-y-0 scale-100"
+                      }`}
+                    >
+                      <span
+                        className={`flex items-center justify-center w-14 h-14 rounded-full text-xl font-bold shrink-0 ${
+                          isNext ? "bg-indigo-600 text-white" : "bg-zinc-100 text-zinc-500"
+                        }`}
+                      >
+                        {index + 1}
+                      </span>
+                      <span className="text-2xl font-semibold text-zinc-900 truncate flex-1">
+                        {client.name}
+                      </span>
+                      {isNext && (
+                        <span className="text-xs font-bold uppercase tracking-wide text-indigo-700 bg-indigo-100 px-3 py-1.5 rounded-full shrink-0">
+                          En turno
+                        </span>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+
+          <aside className="lg:sticky lg:top-10">
+            <div className="rounded-3xl border border-zinc-200 bg-white shadow-sm p-7 flex flex-col items-center text-center">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-zinc-500 mb-4">
+                Anotate desde tu celular
+              </h3>
+              {qrDataUrl ? (
+                <img
+                  src={qrDataUrl}
+                  alt="Código QR para anotarse en la fila"
+                  className="w-52 h-52 rounded-2xl bg-white border border-zinc-200 p-2"
+                />
+              ) : (
+                <div className="w-52 h-52 rounded-2xl bg-zinc-100 border border-zinc-200 animate-pulse" />
+              )}
+              <p className="text-zinc-500 text-sm mt-4">
+                Escaneá el código con la cámara y escribí tu nombre
+              </p>
+            </div>
+
+            <p className="text-center text-xs text-zinc-400 mt-6">
+              Esta pantalla se actualiza sola
+            </p>
+          </aside>
+        </div>
       </div>
     </div>
   );

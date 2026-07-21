@@ -50,5 +50,7 @@ export const api = {
   addClient: (name) =>
     request("/api/queue", { method: "POST", body: JSON.stringify({ name }) }),
   next: () => request("/api/queue/next", { method: "POST" }),
+  join: (name) =>
+    request("/api/queue/join", { method: "POST", body: JSON.stringify({ name }) }),
   isAuthenticated: () => !!getToken()
 };
