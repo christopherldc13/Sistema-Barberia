@@ -20,6 +20,7 @@ export default function QueueDisplay() {
   const prevIdsRef = useRef(new Set());
   const prevFrontIdRef = useRef(undefined);
   const announceTimeoutRef = useRef(null);
+  const announceFallbackRef = useRef(null);
   const announceTokenRef = useRef(0);
 
   const announce = (name) => {
@@ -34,22 +35,51 @@ export default function QueueDisplay() {
       clearTimeout(announceTimeoutRef.current);
       announceTimeoutRef.current = null;
     }
+    if (announceFallbackRef.current) {
+      clearTimeout(announceFallbackRef.current);
+      announceFallbackRef.current = null;
+    }
+
+    // Bug conocido de Chrome: si la página pasa un rato sin hablar, el
+    // motor de voz se "duerme" y a veces nunca dispara "onend", dejando el
+    // anuncio a medias. speakName() es a prueba de doble llamado, así que
+    // dejamos una red de seguridad que igual dice el nombre si eso pasa.
+    let nameSpoken = false;
+    const speakName = () => {
+      if (announceTokenRef.current !== myToken || nameSpoken) return;
+      nameSpoken = true;
+      const nameUtterance = new SpeechSynthesisUtterance(name);
+      nameUtterance.lang = "es-ES";
+      nameUtterance.rate = 0.75;
+      window.speechSynthesis.speak(nameUtterance);
+    };
 
     const intro = new SpeechSynthesisUtterance("Siguiente cliente");
     intro.lang = "es-ES";
     intro.rate = 1.1;
     intro.onend = () => {
       if (announceTokenRef.current !== myToken) return;
-      announceTimeoutRef.current = setTimeout(() => {
-        if (announceTokenRef.current !== myToken) return;
-        const nameUtterance = new SpeechSynthesisUtterance(name);
-        nameUtterance.lang = "es-ES";
-        nameUtterance.rate = 0.75;
-        window.speechSynthesis.speak(nameUtterance);
-      }, 700);
+      announceTimeoutRef.current = setTimeout(speakName, 700);
+    };
+    intro.onerror = () => {
+      if (announceTokenRef.current !== myToken) return;
+      speakName();
     };
     window.speechSynthesis.speak(intro);
+    announceFallbackRef.current = setTimeout(speakName, 3500);
   };
+
+  // Latido: evita que el motor de voz de Chrome se quede "dormido" cuando
+  // pasa un buen rato sin anunciar nada (típico en una TV con poco tráfico).
+  useEffect(() => {
+    if (!speechSupported) return;
+    const heartbeat = setInterval(() => {
+      if (!window.speechSynthesis.speaking) {
+        window.speechSynthesis.resume();
+      }
+    }, 8000);
+    return () => clearInterval(heartbeat);
+  }, []);
 
   // Algunos navegadores móviles solo permiten reproducir audio después de
   // la primera interacción del usuario con la página. En vez de pedirlo
