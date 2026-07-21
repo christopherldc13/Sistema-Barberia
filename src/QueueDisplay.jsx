@@ -239,35 +239,35 @@ export default function QueueDisplay() {
     page: {
       minHeight: "100vh",
       width: "100%",
-      background: "#f5f6ff",
+      background: "linear-gradient(180deg, #eef1ff 0%, #f8f9ff 45%, #ffffff 100%)",
       color: "#18181b",
       fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
     },
     container: {
-      maxWidth: "1600px",
+      maxWidth: "1700px",
       margin: "0 auto",
-      padding: "40px 64px"
+      padding: "48px 72px"
     },
     header: {
       display: "flex",
       alignItems: "flex-start",
       justifyContent: "space-between",
-      marginBottom: "48px",
+      marginBottom: "56px",
       flexWrap: "wrap",
       gap: "16px"
     },
-    brand: { display: "flex", alignItems: "center", gap: "16px" },
-    logo: { fontSize: "48px" },
-    title: { fontSize: "32px", fontWeight: 700, margin: 0, color: "#18181b" },
-    subtitle: { color: "#71717a", fontSize: "14px", margin: "4px 0 0", textTransform: "capitalize" },
-    headerRight: { display: "flex", alignItems: "center", gap: "16px" },
+    brand: { display: "flex", alignItems: "center", gap: "18px" },
+    logo: { fontSize: "56px" },
+    title: { fontSize: "40px", fontWeight: 700, margin: 0, color: "#18181b" },
+    subtitle: { color: "#71717a", fontSize: "16px", margin: "4px 0 0", textTransform: "capitalize" },
+    headerRight: { display: "flex", alignItems: "center", gap: "20px" },
     liveWrap: { textAlign: "right" },
     liveRow: {
       display: "flex",
       alignItems: "center",
       gap: "6px",
       justifyContent: "flex-end",
-      fontSize: "12px",
+      fontSize: "13px",
       color: "#059669",
       fontWeight: 600
     },
@@ -278,17 +278,18 @@ export default function QueueDisplay() {
       backgroundColor: "#10b981",
       display: "inline-block"
     },
-    clock: { fontSize: "20px", fontWeight: 600, color: "#3f3f46" },
+    clock: { fontSize: "24px", fontWeight: 600, color: "#3f3f46" },
     loginLink: {
-      fontSize: "14px",
+      fontSize: "15px",
       fontWeight: 600,
       color: "#52525b",
       backgroundColor: "#ffffff",
       border: "1px solid #e4e4e7",
       borderRadius: "999px",
-      padding: "8px 16px",
+      padding: "10px 20px",
       textDecoration: "none",
-      display: "inline-block"
+      display: "inline-block",
+      boxShadow: "0 1px 3px rgba(24,24,27,0.08)"
     },
     error: { fontSize: "12px", color: "#e11d48", marginBottom: "16px" },
     columns: {
@@ -305,7 +306,7 @@ export default function QueueDisplay() {
       marginBottom: "16px"
     },
     sectionTitle: {
-      fontSize: "13px",
+      fontSize: "15px",
       fontWeight: 600,
       textTransform: "uppercase",
       letterSpacing: "0.05em",
@@ -313,13 +314,14 @@ export default function QueueDisplay() {
       margin: 0
     },
     countBadge: {
-      fontSize: "12px",
+      fontSize: "13px",
       fontWeight: 600,
       color: "#71717a",
       backgroundColor: "#ffffff",
       border: "1px solid #e4e4e7",
       borderRadius: "999px",
-      padding: "4px 12px"
+      padding: "5px 14px",
+      boxShadow: "0 1px 3px rgba(24,24,27,0.06)"
     },
     emptyBox: {
       textAlign: "center",
@@ -329,18 +331,21 @@ export default function QueueDisplay() {
       border: "2px dashed #e4e4e7",
       backgroundColor: "rgba(255,255,255,0.6)"
     },
-    emptyIcon: { fontSize: "60px", marginBottom: "16px" },
-    emptyTitle: { fontSize: "22px", fontWeight: 500, color: "#3f3f46", margin: 0 },
+    emptyIcon: { fontSize: "72px", marginBottom: "20px" },
+    emptyTitle: { fontSize: "26px", fontWeight: 500, color: "#3f3f46", margin: 0 },
     emptySubtitle: { marginTop: "8px", color: "#71717a" },
     list: { listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "12px" },
     item: (isNext, visible) => ({
       display: "flex",
       alignItems: "center",
-      gap: "20px",
+      gap: "22px",
       borderRadius: "24px",
-      padding: "20px 24px",
+      padding: "24px 28px",
       border: `1px solid ${isNext ? "#a5b4fc" : "#e4e4e7"}`,
       backgroundColor: isNext ? "#eef2ff" : "#ffffff",
+      boxShadow: isNext
+        ? "0 8px 20px rgba(79,70,229,0.15)"
+        : "0 1px 4px rgba(24,24,27,0.06)",
       transition: "opacity 0.4s ease-out, transform 0.4s ease-out",
       opacity: visible ? 1 : 0,
       transform: visible ? "translateY(0)" : "translateY(12px)"
@@ -349,17 +354,17 @@ export default function QueueDisplay() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      width: "56px",
-      height: "56px",
-      borderRadius: "56px",
-      fontSize: "20px",
+      width: "64px",
+      height: "64px",
+      borderRadius: "64px",
+      fontSize: "24px",
       fontWeight: 700,
       flexShrink: 0,
       backgroundColor: isNext ? "#4f46e5" : "#f4f4f5",
       color: isNext ? "#ffffff" : "#71717a"
     }),
     clientName: {
-      fontSize: "24px",
+      fontSize: "28px",
       fontWeight: 600,
       color: "#18181b",
       flex: 1,
@@ -368,52 +373,53 @@ export default function QueueDisplay() {
       whiteSpace: "nowrap"
     },
     nextPill: {
-      fontSize: "12px",
+      fontSize: "13px",
       fontWeight: 700,
       textTransform: "uppercase",
       letterSpacing: "0.05em",
       color: "#4338ca",
       backgroundColor: "#e0e7ff",
-      padding: "6px 12px",
+      padding: "8px 14px",
       borderRadius: "999px",
       flexShrink: 0
     },
-    aside: { flex: "0 1 340px", minWidth: "280px" },
+    aside: { flex: "0 1 360px", minWidth: "300px" },
     qrCard: {
-      borderRadius: "24px",
+      borderRadius: "28px",
       border: "1px solid #e4e4e7",
       backgroundColor: "#ffffff",
-      padding: "28px",
+      padding: "36px",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      textAlign: "center"
+      textAlign: "center",
+      boxShadow: "0 12px 28px rgba(24,24,27,0.08)"
     },
     qrTitle: {
-      fontSize: "13px",
+      fontSize: "15px",
       fontWeight: 600,
       textTransform: "uppercase",
       letterSpacing: "0.05em",
       color: "#71717a",
-      margin: "0 0 16px"
+      margin: "0 0 20px"
     },
     qrImage: {
-      width: "208px",
-      height: "208px",
+      width: "240px",
+      height: "240px",
       borderRadius: "16px",
       backgroundColor: "#ffffff",
       border: "1px solid #e4e4e7",
-      padding: "8px"
+      padding: "10px"
     },
     qrPlaceholder: {
-      width: "208px",
-      height: "208px",
+      width: "240px",
+      height: "240px",
       borderRadius: "16px",
       backgroundColor: "#f4f4f5",
       border: "1px solid #e4e4e7"
     },
-    qrCaption: { color: "#71717a", fontSize: "14px", marginTop: "16px" },
-    footerNote: { textAlign: "center", fontSize: "12px", color: "#a1a1aa", marginTop: "24px" }
+    qrCaption: { color: "#71717a", fontSize: "15px", marginTop: "18px", lineHeight: 1.5 },
+    footerNote: { textAlign: "center", fontSize: "13px", color: "#a1a1aa", marginTop: "24px" }
   };
 
   return (
