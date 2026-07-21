@@ -19,20 +19,31 @@ export default function QueueDisplay() {
   const prevIdsRef = useRef(new Set());
   const prevFrontIdRef = useRef(undefined);
   const announceTimeoutRef = useRef(null);
+  const announceTokenRef = useRef(0);
 
   const joinUrl =
     typeof window !== "undefined" ? `${window.location.origin}/unirse` : "";
 
   const announce = (name) => {
     if (!speechSupported) return;
+
+    // Algunos navegadores disparan "onend" más de una vez (ej. al mezclarse
+    // con cancel()), lo que duplicaba el nombre. Este token invalida
+    // cualquier callback que quede de un anuncio anterior o repetido.
+    const myToken = ++announceTokenRef.current;
     window.speechSynthesis.cancel();
-    if (announceTimeoutRef.current) clearTimeout(announceTimeoutRef.current);
+    if (announceTimeoutRef.current) {
+      clearTimeout(announceTimeoutRef.current);
+      announceTimeoutRef.current = null;
+    }
 
     const intro = new SpeechSynthesisUtterance("Siguiente cliente");
     intro.lang = "es-ES";
     intro.rate = 0.75;
     intro.onend = () => {
+      if (announceTokenRef.current !== myToken) return;
       announceTimeoutRef.current = setTimeout(() => {
+        if (announceTokenRef.current !== myToken) return;
         const nameUtterance = new SpeechSynthesisUtterance(name);
         nameUtterance.lang = "es-ES";
         nameUtterance.rate = 0.75;
