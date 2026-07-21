@@ -16,13 +16,11 @@ export default function QueueDisplay() {
   const [now, setNow] = useState(() => new Date());
   const [enteringIds, setEnteringIds] = useState(() => new Set());
   const [qrDataUrl, setQrDataUrl] = useState("");
+  const [qrToken, setQrToken] = useState("");
   const prevIdsRef = useRef(new Set());
   const prevFrontIdRef = useRef(undefined);
   const announceTimeoutRef = useRef(null);
   const announceTokenRef = useRef(0);
-
-  const joinUrl =
-    typeof window !== "undefined" ? `${window.location.origin}/unirse` : "";
 
   const announce = (name) => {
     if (!speechSupported) return;
@@ -74,8 +72,32 @@ export default function QueueDisplay() {
     };
   }, []);
 
+  // El token del QR vence y rota solo (ver backend), así una foto o link
+  // compartido del código deja de servir a los pocos segundos: solo sirve
+  // escanearlo estando físicamente frente a la pantalla.
   useEffect(() => {
-    if (!joinUrl) return;
+    let cancelled = false;
+
+    const fetchToken = async () => {
+      try {
+        const { token } = await api.getQrToken();
+        if (!cancelled) setQrToken(token);
+      } catch {
+        // si falla, el QR simplemente se queda con el último válido
+      }
+    };
+
+    fetchToken();
+    const interval = setInterval(fetchToken, 3000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!qrToken || typeof window === "undefined") return;
+    const joinUrl = `${window.location.origin}/unirse?token=${qrToken}`;
     QRCode.toDataURL(joinUrl, {
       margin: 1,
       width: 280,
@@ -83,7 +105,7 @@ export default function QueueDisplay() {
     })
       .then(setQrDataUrl)
       .catch(() => setQrDataUrl(""));
-  }, [joinUrl]);
+  }, [qrToken]);
 
   useEffect(() => {
     let cancelled = false;

@@ -1,16 +1,21 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api } from "./api";
 
 /**
  * Página pública a la que se llega escaneando el QR de /pantalla.
  * El cliente escribe su nombre y se anota solo en la cola, sin login.
+ * El link solo funciona con el token vigente del QR (rota solo, ver
+ * backend), así que hay que estar frente a la pantalla para anotarse.
  */
 export default function SelfCheckIn() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+
   const [name, setName] = useState("");
   const [status, setStatus] = useState("idle"); // idle | saving | done | error
   const [error, setError] = useState("");
   const [position, setPosition] = useState(null);
-  const inputRef = useRef(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +25,7 @@ export default function SelfCheckIn() {
     setStatus("saving");
     setError("");
     try {
-      const { position: pos } = await api.join(trimmed);
+      const { position: pos } = await api.join(trimmed, token);
       setPosition(pos);
       setStatus("done");
     } catch (err) {
@@ -29,28 +34,27 @@ export default function SelfCheckIn() {
     }
   };
 
-  const handleAgain = () => {
-    setName("");
-    setStatus("idle");
-    setPosition(null);
-    setTimeout(() => inputRef.current?.focus(), 50);
-  };
-
   if (status === "done") {
     return (
       <div className="min-h-[100dvh] w-full bg-zinc-950 text-zinc-100 flex flex-col items-center justify-center px-6 font-sans text-center">
         <div className="text-6xl mb-4">✅</div>
         <h1 className="text-2xl font-bold text-white mb-1">¡Listo, {name.trim()}!</h1>
-        <p className="text-zinc-400 mb-6">
+        <p className="text-zinc-400">
           Sos el número <span className="text-indigo-400 font-bold">{position}</span> en la
           fila
         </p>
-        <button
-          onClick={handleAgain}
-          className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
-        >
-          Anotar a otra persona
-        </button>
+      </div>
+    );
+  }
+
+  if (!token) {
+    return (
+      <div className="min-h-[100dvh] w-full bg-zinc-950 text-zinc-100 flex flex-col items-center justify-center px-6 font-sans text-center">
+        <div className="text-4xl mb-3">📵</div>
+        <h1 className="text-lg font-bold text-white mb-1">Escaneá el código QR</h1>
+        <p className="text-sm text-zinc-400 max-w-xs">
+          Para anotarte tenés que escanear el QR que está en la pantalla de la barbería
+        </p>
       </div>
     );
   }
@@ -63,7 +67,6 @@ export default function SelfCheckIn() {
 
       <form onSubmit={handleSubmit} className="w-full max-w-xs">
         <input
-          ref={inputRef}
           type="text"
           autoFocus
           value={name}
