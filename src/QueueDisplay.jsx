@@ -164,7 +164,7 @@ export default function QueueDisplay() {
               </div>
             </div>
             <Link
-              to="/"
+              to="/panel"
               className="text-sm font-semibold text-zinc-600 bg-white border border-zinc-200 hover:border-zinc-300 hover:text-zinc-900 shadow-sm rounded-full px-4 py-2 transition-colors"
             >
               Iniciar sesión

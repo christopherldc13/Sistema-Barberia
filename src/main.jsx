@@ -10,8 +10,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<ControlApp />} />
+        <Route path="/" element={<QueueDisplay />} />
         <Route path="/pantalla" element={<QueueDisplay />} />
+        <Route path="/panel" element={<ControlApp />} />
         <Route path="/unirse" element={<SelfCheckIn />} />
       </Routes>
     </BrowserRouter>

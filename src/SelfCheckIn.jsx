@@ -1,5 +1,4 @@
 import React, { useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { api } from "./api";
 
 /**
@@ -46,12 +45,6 @@ export default function SelfCheckIn() {
           Sos el número <span className="text-indigo-400 font-bold">{position}</span> en la
           fila
         </p>
-        <Link
-          to="/pantalla"
-          className="rounded-full bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all px-6 py-3 font-semibold text-white shadow-lg shadow-indigo-950/50 mb-3"
-        >
-          Ver la fila en vivo
-        </Link>
         <button
           onClick={handleAgain}
           className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
