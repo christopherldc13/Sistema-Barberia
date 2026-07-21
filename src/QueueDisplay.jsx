@@ -37,7 +37,7 @@ export default function QueueDisplay() {
 
     const intro = new SpeechSynthesisUtterance("Siguiente cliente");
     intro.lang = "es-ES";
-    intro.rate = 0.75;
+    intro.rate = 1.1;
     intro.onend = () => {
       if (announceTokenRef.current !== myToken) return;
       announceTimeoutRef.current = setTimeout(() => {
